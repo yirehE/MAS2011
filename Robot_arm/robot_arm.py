@@ -17,7 +17,7 @@ BLUE = (0, 0, 255)
 pygame.init()
 
 # 윈도우 제목
-pygame.display.set_caption("Drawing")
+pygame.display.set_caption("Robot Arm")
 
 # 윈도우 생성
 screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
