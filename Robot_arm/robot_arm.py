@@ -76,20 +76,17 @@ class JOINT:
             theta = np.random.choice([-3,3],p=[.8,.2])
         else:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    pass
-                elif event.key == pygame.K_RIGHT:
-                    pass
-                elif event.key == pygame.K_UP:
+                if event.key == pygame.K_UP:
                     theta = -3
                 elif event.key == pygame.K_DOWN:
                     theta = 3
-        for arm in self.armlist:
-            a = MR(theta, self.point)@(to_affine(arm.rec).T)
-            arm.rec = rev_affine(a.T)
-        for joint in self.jointlist:
-            j = MR(theta, self.point)@(to_affine(joint.point).T)
-            joint.point = rev_affine(j.T)
+        if theta:
+            for arm in self.armlist:
+                a = MR(theta, self.point)@(to_affine(arm.rec).T)
+                arm.rec = rev_affine(a.T)
+            for joint in self.jointlist:
+                j = MR(theta, self.point)@(to_affine(joint.point).T)
+                joint.point = rev_affine(j.T)
     
     def draw(self, screen):
         pygame.draw.circle(screen, self.color, self.point, 8)
@@ -97,12 +94,10 @@ class JOINT:
 ar = np.array([[350, 500], [500, 500], [500, 800], [350, 800]])
 jp = np.array([425,550])
 jpp = np.array([425,750])
-matrix = MR(-120,jp)
-ar2 = rev_affine((matrix@(to_affine(ar).T)).T)
-jp2 = rev_affine((matrix@(to_affine(jpp).T)).T)
-matrix2 = MR(-120,jp2)
-ar3 = rev_affine((matrix2@(to_affine(ar2).T)).T)
-jp3 = rev_affine((matrix2@(to_affine(jp).T)).T)
+ar2 = rev_affine((MR(-120,jp)@(to_affine(ar).T)).T)
+jp2 = rev_affine((MR(-120,jp)@(to_affine(jpp).T)).T)
+ar3 = rev_affine((MR(-120,jp2)@(to_affine(ar2).T)).T)
+jp3 = rev_affine((MR(-120,jp2)@(to_affine(jp).T)).T)
 ar4 = rev_affine((MR(-120,jp3)@(to_affine(ar3).T)).T)
 arm_list = [ARM(ar),ARM(ar2),ARM(ar3),ARM(ar4)]
 joint_list = []
@@ -112,12 +107,10 @@ joint_list.append(JOINT(arm_list[1:], joints=joint_list[:],point=jp))
 
 
 auto = False
-i=0
+i=2
 
-# 게임 반복 구간
 while not done:
     joint = joint_list[i]
-    # 이벤트 반복 구간
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -127,12 +120,11 @@ while not done:
             elif event.key == pygame.K_2:
                 auto = False
             elif event.key == pygame.K_LEFT:
-                i = max(0,i-1)
-            elif event.key == pygame.K_RIGHT:
                 i = min(2,i+1)
+            elif event.key == pygame.K_RIGHT:
+                i = max(0,i-1)
     joint.move(event,auto)
             
-    # 윈도우 화면 채우기
     screen.fill(BLACK)
 
     for a in arm_list:
@@ -141,14 +133,11 @@ while not done:
         j.draw(screen)
     
     font = pygame.font.SysFont('FixedSys', 40, True, False)
-    text = font.render(f"1:auto   2:keyboard    Automode:{auto}    joint:{i}", True, WHITE)
+    text = font.render(f"1:auto   2:keyboard    Automode:{auto}    joint:{2-i}", True, WHITE)
     screen.blit(text, [10, 10])
 
-    # 화면 업데이트
     pygame.display.flip()
 
-    # 초당 60 프레임으로 업데이트
     clock.tick(60)
 
-# 게임 종료
 pygame.quit()
