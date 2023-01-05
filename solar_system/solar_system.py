@@ -69,13 +69,12 @@ def rev_affine(arr):
 
 class STAR():
     star = pygame.image.load(path.join(asset_dir, "star_r.png")).convert()
-
     def __init__(self,):
         px = np.random.random_sample()*(WINDOW_WIDTH)
         py = np.random.random_sample()*(WINDOW_HEIGHT)
         self.point = np.array([px, py])
         self.t = np.random.randint(0,100)
-        self.star = STAR.star
+        print('a')
 
     def draw(self, screen, time=0):
         self.star.set_alpha(abs(100-(self.t + time)%200))
