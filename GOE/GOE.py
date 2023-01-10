@@ -344,7 +344,6 @@ class Warning_message():
             return False
 
 def show_go_screen():
-    # waiting = True
     while 1:
         screen.blit(background, background_rect)
         draw_text(screen, "G.O.E.", 64, WIDTH / 2, HEIGHT / 4)
@@ -360,10 +359,8 @@ def show_go_screen():
                 if event.key == pygame.K_m:
                     show_market()
                 elif event.key == pygame.K_e:
-                    # waiting = False
                     return 3000, [.2,.2,.6]
                 elif event.key == pygame.K_h:
-                    # waiting = False
                     return 1200, [.1,.1,.8]
                 else:
                     pass
@@ -381,8 +378,6 @@ def show_market():
     while waiting:
         screen.blit(background, background_rect)
         draw_text(screen, "MARKET", 64, WIDTH / 2, HEIGHT / 12)
-        # draw_text(screen, "Arrow keys move, Space to fire", 22,
-        #           WIDTH / 2, HEIGHT / 2)
         draw_text(screen, "Press P to play", 18, WIDTH / 2, HEIGHT * 5/6)
         item('PowerUP Time',30,HEIGHT / 4 - 50, 50, 'T')
         item('SHIELD',WIDTH - 230 ,HEIGHT / 4 - 50, 50, 'H')
@@ -397,18 +392,22 @@ def show_market():
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_t:
                     if player.coin >= 50:
+                        coin_sound.play()
                         player.coin -= 50
                         player.power_time += 200
                 elif event.key == pygame.K_h:
                     if player.coin >= 50:
+                        coin_sound.play()
                         player.coin -= 50
                         player.maxshield += 10
                 elif event.key == pygame.K_s:
                     if player.coin >= 50:
+                        coin_sound.play()
                         player.coin -= 50
                         player.speed += .5
                 elif event.key == pygame.K_f and player.shoot_delay>5:
                     if player.coin >= 80:
+                        coin_sound.play()
                         player.coin -= 80
                         player.shoot_delay = max(player.shoot_delay-5,0)
                 elif event.key == pygame.K_p:
@@ -457,6 +456,7 @@ shield_sound = pygame.mixer.Sound(path.join(snd_dir, 'pow4.wav'))
 power_sound = pygame.mixer.Sound(path.join(snd_dir, 'pow5.wav'))
 expl_sounds = [pygame.mixer.Sound(path.join(snd_dir, snd)) for snd in ['expl3.wav', 'expl6.wav']]
 player_die_sound = pygame.mixer.Sound(path.join(snd_dir, 'rumble1.ogg'))
+coin_sound = pygame.mixer.Sound(path.join(snd_dir, 'coin.wav'))
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 
@@ -610,5 +610,4 @@ while running:
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
-print(respawn)
 pygame.quit()
