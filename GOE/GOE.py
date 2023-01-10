@@ -12,6 +12,7 @@
 import pygame
 import random
 import numpy as np
+import os
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
@@ -40,7 +41,10 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption(f"{NAME}")
 clock = pygame.time.Clock()
 
-font_name = pygame.font.match_font('Verdana')
+this_program_directory = os.path.dirname(os.path.abspath(__file__))
+os.chdir(this_program_directory)
+# font_name = pygame.font.match_font('Verdana')
+font_name = 'DungGeunMo.ttf'
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, DARKBLUE)
@@ -340,8 +344,8 @@ class Warning_message():
             return False
 
 def show_go_screen():
-    waiting = True
-    while waiting:
+    # waiting = True
+    while 1:
         screen.blit(background, background_rect)
         draw_text(screen, "G.O.E.", 64, WIDTH / 2, HEIGHT / 4)
         draw_text(screen, "Arrow keys move, Space to fire", 22,
@@ -356,15 +360,13 @@ def show_go_screen():
                 if event.key == pygame.K_m:
                     show_market()
                 elif event.key == pygame.K_e:
-                    respawn = 3000
-                    percent = [.2,.2,.6]
-                    waiting = False
+                    # waiting = False
+                    return 3000, [.2,.2,.6]
                 elif event.key == pygame.K_h:
-                    respawn = 300
-                    percent = [.1,.1,.8]
-                    waiting = False
+                    # waiting = False
+                    return 1200, [.1,.1,.8]
                 else:
-                    waiting = False
+                    pass
 
 def show_market():
     def item(name, x, y, cost, key):
@@ -385,7 +387,7 @@ def show_market():
         item('PowerUP Time',30,HEIGHT / 4 - 50, 50, 'T')
         item('SHIELD',WIDTH - 230 ,HEIGHT / 4 - 50, 50, 'H')
         item('SPEED',30,HEIGHT / 2, 50, 'S')
-        item('SHOOT SPEED',WIDTH - 230,HEIGHT / 2, 50, 'F')
+        item('SHOOT SPEED',WIDTH - 230,HEIGHT / 2, 80, 'F')
         clock.tick(FPS)
         draw_coin(screen, WIDTH - 100, 5, coin_img, player.coin)
         pygame.display.flip()
@@ -490,7 +492,7 @@ while running:
             b = True
 
     if game_over:
-        show_go_screen()
+        respawn, percent = show_go_screen()
         game_over = False
         player.shield = player.maxshield
         player.lives = 2
@@ -531,7 +533,7 @@ while running:
         newmob()
 
     # check to see if a mob hit the player
-    hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
+    hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_mask)
     for hit in hits:
         player.shield -= hit.radius * 3
         expl = Explosion(hit.rect.center, 'sm')
@@ -546,7 +548,7 @@ while running:
             player.shield = player.maxshield
 
     # check to see if a boss bullet hit the player
-    hits = pygame.sprite.spritecollide(player, bossbullets, True, pygame.sprite.collide_circle)
+    hits = pygame.sprite.spritecollide(player, bossbullets, True, pygame.sprite.collide_mask)
     for hit in hits:
         player.shield -= 30
         expl = Explosion(hit.rect.center, 'sm')
@@ -608,4 +610,5 @@ while running:
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
+print(respawn)
 pygame.quit()
