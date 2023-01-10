@@ -273,28 +273,20 @@ class Bullet(pygame.sprite.Sprite):
 
     def update(self):
         self.rect.y += self.speedy
-        # kill if it moves off the top of the screen
         if self.rect.bottom < 0:
             self.kill()
 
-class BossBullet(pygame.sprite.Sprite):
+class BossBullet(Bullet, pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = boss_bullet_img
-        self.rect = self.image.get_rect()
-        self.rect.bottom = y
-        self.rect.centerx = x
+        super().__init__(x, y)
         self.speedy = 5
+        self.image = boss_bullet_img
     
-    def update(self):
-        self.rect.y += self.speedy
-        if self.rect.top > HEIGHT:
-            self.kill()
-
 class Pow(pygame.sprite.Sprite):
-    def __init__(self, center):
+    def __init__(self, center, percent):
         pygame.sprite.Sprite.__init__(self)
-        self.type = np.random.choice(['shield', 'gun', 'coin'], p=[.2,.2,.6 ])
+        self.type = np.random.choice(['shield', 'gun', 'coin'], p=percent)
         self.image = powerup_images[self.type]
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -354,7 +346,7 @@ def show_go_screen():
         draw_text(screen, "G.O.E.", 64, WIDTH / 2, HEIGHT / 4)
         draw_text(screen, "Arrow keys move, Space to fire", 22,
                 WIDTH / 2, HEIGHT / 2)
-        draw_text(screen, "Press M to go market and other keys to begin", 18, WIDTH / 2, HEIGHT * 3 / 4)
+        draw_text(screen, "M : Market   E : Easy mode   H : Hard mode", 18, WIDTH / 2, HEIGHT * 3 / 4)
         pygame.display.flip()
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -363,6 +355,14 @@ def show_go_screen():
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_m:
                     show_market()
+                elif event.key == pygame.K_e:
+                    respawn = 3000
+                    percent = [.2,.2,.6]
+                    waiting = False
+                elif event.key == pygame.K_h:
+                    respawn = 300
+                    percent = [.1,.1,.8]
+                    waiting = False
                 else:
                     waiting = False
 
@@ -394,20 +394,20 @@ def show_market():
                 pygame.quit()
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_t:
-                    if player.coin > 50:
+                    if player.coin >= 50:
                         player.coin -= 50
                         player.power_time += 200
                 elif event.key == pygame.K_h:
-                    if player.coin > 50:
+                    if player.coin >= 50:
                         player.coin -= 50
                         player.maxshield += 10
                 elif event.key == pygame.K_s:
-                    if player.coin > 50:
+                    if player.coin >= 50:
                         player.coin -= 50
                         player.speed += .5
-                elif event.key == pygame.K_f:
-                    if player.coin > 50:
-                        player.coin -= 50
+                elif event.key == pygame.K_f and player.shoot_delay>5:
+                    if player.coin >= 80:
+                        player.coin -= 80
                         player.shoot_delay = max(player.shoot_delay-5,0)
                 elif event.key == pygame.K_p:
                     waiting = False
@@ -464,13 +464,19 @@ game_over = True
 running = True
 player = Player()
 flag = False
+mobflag = True
 b = True
-# boss = Boss()
+respawn = 3000
+percent = [.2,.2,.6]
 
 while running:
     if not game_over:
-        if (pygame.time.get_ticks() - t) % 300 == 0:
-            newmob()
+        if (pygame.time.get_ticks() - t) % respawn <= 10:
+            if mobflag:
+                newmob()
+                mobflag = False
+        else:
+            mobflag = True
 
         if len(mobs)%7 == 2 and b:
             warning = Warning_message()
@@ -518,8 +524,8 @@ while running:
         random.choice(expl_sounds).play()
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
-        if random.random() > 0.3:
-            pow = Pow(hit.rect.center)
+        if random.random() > 0.5:
+            pow = Pow(hit.rect.center, percent)
             all_sprites.add(pow)
             powerups.add(pow)
         newmob()
@@ -581,7 +587,7 @@ while running:
         if hit.type == 'gun':
             player.powerup()
             power_sound.play()
-        if hit.type == 'gun':
+        if hit.type == 'coin':
             player.coin += 1
 
     # if the player died and the explosion has finished playing
