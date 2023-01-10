@@ -1,5 +1,7 @@
 # GOE
 
+notion : [https://just-ring-dfc.notion.site/GOE-0a61445288ff40a3a0fab4f3ecb052cf](https://just-ring-dfc.notion.site/GOE-0a61445288ff40a3a0fab4f3ecb052cf)
+
 Genre : scroll shooting game
 
 Library : pygame
